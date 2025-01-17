@@ -1,0 +1,56 @@
+# Import required libraries
+from diffusers import StableDiffusionPipeline  # For generating images using Stable Diffusion
+import gradio as gr  # For creating the user interface
+from PIL import Image  # For handling image files
+
+# Step 1: Load the Stable Diffusion model
+# Ensure you have GPU support for faster performance
+pipe = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5")  # Pre-trained model
+pipe.to("cuda")  # Move the model to GPU for efficiency (use "cpu" if GPU is unavailable)
+
+# Step 2: Define the image generation function
+def generate_image(prompt):
+    """
+    Generates an AI image based on the user's text prompt.
+
+    Args:
+        prompt (str): The user's description of their dream.
+
+    Returns:
+        Image: Generated image based on the input prompt.
+    """
+    # Generate the image using Stable Diffusion
+    image = pipe(prompt).images[0]
+    return image
+
+# Step 3: Define the Gradio user interface function
+def dream_visualizer(prompt):
+    """
+    Handles user input, generates a dream visualization, and returns the image.
+
+    Args:
+        prompt (str): The user's dream description.
+
+    Returns:
+        Image: The generated image.
+    """
+    # Call the image generation function
+    image = generate_image(prompt)
+    return image
+
+# Step 4: Create a Gradio interface
+interface = gr.Interface(
+    fn=dream_visualizer,  # Function to call when the user submits input
+    inputs=gr.Textbox(lines=5, label="Describe Your Dream"),  # Textbox for user input
+    outputs=gr.Image(label="Visualized Dream"),  # Output is an image
+    title="Dream Visualizer",  # Title of the app
+    description=(
+        "Describe your dream in vivid detail, and this tool will generate "
+        "a surreal image representing your dream. Examples: "
+        "'A glowing forest under a starry sky' or 'A castle floating on clouds'."
+    )
+)
+
+# Step 5: Launch the application
+# This will start a local server and open the app in your default browser
+interface.launch()
